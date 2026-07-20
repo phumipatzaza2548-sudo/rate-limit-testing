@@ -10,6 +10,13 @@ import time
 app = Flask(__name__)
 # แสดง JSON ตามลำดับที่เขียนไว้ใน Dictionary
 app.json.sort_keys = False
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memmory://",
+    headers_enabled=True
+)
 
 WORK_FACTOR = 2_000_000 ##---------##
 PASSWORD_LENGTH = 10
@@ -43,6 +50,8 @@ def home():
 
 
 @app.route("/login-check")
+@limiter.limit("5 per second")
+#limiter.limit("10 per minute")
 def login_check():
     start_time = time.perf_counter()
 
